@@ -4,142 +4,235 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Preços Originação — Grupo Spasso</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root {
-    --green: #1a7a3f;
-    --green-dark: #145c30;
-    --ink: #1a2b1f;
-    --muted: #6b7c70;
-    --line: #e2e8e4;
-    --zebra: #f4f8f5;
-    --fresh: #1a7a3f;
+    --green: #22a45d;
+    --green-dark: #1b8b4e;
+    --ink: #0f172a;
+    --cell: #334155;
+    --muted: #94a3b8;
+    --line: #e2e8f0;
+    --zebra: #f8fafc;
+    --fresh: #15803d;
+    --fresh-bg: #dcfce7;
     --stale: #b45309;
+    --stale-bg: #fef3c7;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: var(--ink);
+    color: var(--cell);
     background: #fff;
-    padding: 24px 16px 60px;
-    max-width: 1200px;
+    padding: 28px 20px 60px;
+    max-width: 1280px;
     margin: 0 auto;
   }
-  header {
-    display: flex;
+
+  /* ---------- cabeçalho ---------- */
+  .pageHead {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
-    border-bottom: 3px solid var(--green);
-    padding-bottom: 16px;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
-    gap: 12px;
+    gap: 16px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
   }
-  .brand { display: flex; align-items: center; gap: 12px; }
-  .brand h1 { font-size: 20px; letter-spacing: 0.5px; }
-  .brand .sub { font-size: 12px; color: var(--muted); }
+  .pageHead .logo { justify-self: start; }
+  .pageHead .logo img { height: 60px; display: block; }
+  .pageHead h1 {
+    justify-self: center;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: var(--ink);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
   .fresh {
+    justify-self: end;
     font-size: 13px;
     padding: 6px 12px;
     border-radius: 6px;
     font-weight: 600;
+    white-space: nowrap;
   }
-  .fresh.ok { background: #e7f4ec; color: var(--fresh); }
-  .fresh.old { background: #fdf0e0; color: var(--stale); }
+  .fresh.ok { background: var(--fresh-bg); color: var(--fresh); }
+  .fresh.old { background: var(--stale-bg); color: var(--stale); }
+
+  /* ---------- filtros ---------- */
   .filters {
     display: flex;
-    gap: 16px;
+    gap: 12px;
     align-items: center;
     flex-wrap: wrap;
-    margin: 20px 0 16px;
+    margin: 22px 0 18px;
   }
   .pills { display: flex; gap: 8px; }
   .pill {
     border: 1px solid var(--line);
     background: #fff;
-    color: var(--ink);
-    padding: 7px 16px;
+    color: var(--cell);
+    padding: 8px 18px;
     border-radius: 999px;
     cursor: pointer;
     font-size: 14px;
-    font-weight: 500;
-  }
-  .pill.active { background: var(--green); color: #fff; border-color: var(--green); }
-  select {
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 7px 12px;
-    font-size: 14px;
+    font-weight: 600;
     font-family: inherit;
-    color: var(--ink);
-    background: #fff;
   }
-  table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  .pill:hover { border-color: var(--green); color: var(--green-dark); }
+  .pill.active { background: var(--green); color: #fff; border-color: var(--green); }
+
+  .multi { position: relative; }
+  .multiBtn {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--cell);
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .multiBtn:hover { border-color: var(--green); color: var(--green-dark); }
+  .multiBtn .caret { font-size: 10px; color: var(--muted); }
+  .multiPanel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 20;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(15,23,42,.12);
+    padding: 8px;
+    min-width: 230px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .multi.open .multiPanel { display: block; }
+  .multiPanel label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--cell);
+  }
+  .multiPanel label:hover { background: var(--zebra); }
+  .multiPanel input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--green); cursor: pointer; }
+  .multiPanel .sep { height: 1px; background: var(--line); margin: 6px 4px; }
+
+  .spacer { flex: 1; }
+  .exportBtn {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--cell);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: inherit;
+  }
+  .exportBtn:hover { border-color: var(--green); color: var(--green-dark); }
+
+  /* ---------- tabela ---------- */
+  table { width: 100%; border-collapse: separate; border-spacing: 0; }
   thead th {
     background: var(--green);
     color: #fff;
     text-align: left;
-    padding: 12px 14px;
+    padding: 15px 18px;
     font-size: 13px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.6px;
+    white-space: nowrap;
   }
+  thead th:first-child { border-radius: 8px 0 0 0; }
+  thead th:last-child { border-radius: 0 8px 0 0; }
   tbody td {
-    padding: 11px 14px;
-    border-bottom: 1px solid var(--line);
-    font-size: 14px;
+    padding: 14px 18px;
+    font-size: 14.5px;
+    color: var(--cell);
   }
   tbody tr:nth-child(even) { background: var(--zebra); }
-  .count { font-size: 13px; color: var(--muted); margin-top: 10px; text-align: right; }
-  .empty { padding: 40px; text-align: center; color: var(--muted); }
-  footer {
-    margin-top: 40px;
-    text-align: center;
-    font-size: 12px;
-    color: var(--muted);
-  }
-  footer a { color: var(--muted); text-decoration: underline; }
+
+  .count { font-size: 13px; color: var(--muted); margin-top: 14px; text-align: right; }
+  .empty { padding: 50px; text-align: center; color: var(--muted); }
   .loading { padding: 60px; text-align: center; color: var(--muted); }
+
+  footer { margin-top: 44px; text-align: center; font-size: 12px; color: var(--muted); }
+  footer a { color: var(--muted); text-decoration: underline; }
+
+  /* ---------- área off-screen usada só na exportação PNG ---------- */
+  #exportStage {
+    position: fixed;
+    left: -10000px;
+    top: 0;
+    width: 1280px;
+    background: #fff;
+    padding: 40px;
+  }
 </style>
 </head>
 <body>
-  <header>
-    <div class="brand">
-      <div>
-        <h1>PREÇOS ORIGINAÇÃO</h1>
-        <div class="sub">Grupo Spasso</div>
-      </div>
-    </div>
+
+  <div class="pageHead">
+    <div class="logo"><img src="logo-spasso.png" alt="Grupo Spasso"></div>
+    <h1>Preços Originação</h1>
     <div id="fresh" class="fresh ok">—</div>
-  </header>
+  </div>
 
   <div class="filters" id="filters" style="display:none">
     <div class="pills" id="commodityPills"></div>
-    <select id="pracaFilter"><option value="__all__">Todas as praças</option></select>
+
+    <div class="multi" id="pracaMulti">
+      <button class="multiBtn" id="pracaBtn" type="button">
+        <span id="pracaLabel">Todas as praças</span><span class="caret">▼</span>
+      </button>
+      <div class="multiPanel" id="pracaPanel"></div>
+    </div>
+
+    <div class="spacer"></div>
+    <button class="exportBtn" id="btnCsv" type="button">Exportar CSV</button>
+    <button class="exportBtn" id="btnPng" type="button">Exportar PNG</button>
   </div>
 
   <div id="content" class="loading">Carregando…</div>
   <div class="count" id="count"></div>
 
   <footer>
-    <a href="APP_LOGIN_URL">Acesso à plataforma</a>
+    <a href="https://spasso-hedge-v3.lovable.app">Acesso à plataforma</a>
   </footer>
 
+  <div id="exportStage"></div>
+
 <script>
-  // AJUSTAR: URL do Worker (ex.: https://tabela-spasso.SEU-SUBDOMINIO.workers.dev)
   const WORKER_URL = "https://spasso-public-table-api.mesaagro.workers.dev";
+
+  const COMMODITY_COL = "commodity";
+  const PRACA_COL = "praca";
 
   let DATA = null;
   let activeCommodity = "__all__";
-  let activePraca = "__all__";
+  let selectedPracas = new Set();   // vazio = todas
 
-  const COMMODITY_COL = "commodity"; // nome da coluna de commodity
-  const PRACA_COL = "praca";         // nome da coluna de praça
-
+  /* ---------- carga ---------- */
   async function load() {
     try {
       const res = await fetch(WORKER_URL + "/table");
       if (!res.ok) throw new Error("no table");
       DATA = await res.json();
+      buildFilters();
       render();
     } catch (e) {
       document.getElementById("content").innerHTML =
@@ -150,30 +243,28 @@
 
   function fmtFresh(iso) {
     const d = new Date(iso);
-    const now = new Date();
-    const sameDay = d.toDateString() === now.toDateString();
-    const data = d.toLocaleDateString("pt-BR");
-    const hora = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    const sameDay = d.toDateString() === new Date().toDateString();
     const el = document.getElementById("fresh");
     el.className = "fresh " + (sameDay ? "ok" : "old");
-    el.textContent = "Atualizado em " + data + " às " + hora;
+    el.textContent = "Atualizado em " +
+      d.toLocaleDateString("pt-BR") + " às " +
+      d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   }
 
   function uniqueValues(col) {
     const s = new Set();
     DATA.rows.forEach(r => { if (r[col] != null) s.add(r[col]); });
-    return [...s].sort();
+    return [...s].sort((a, b) => String(a).localeCompare(String(b), "pt-BR"));
   }
 
+  /* ---------- filtros ---------- */
   function buildFilters() {
-    // pills de commodity
+    // commodity (pills)
     const pills = document.getElementById("commodityPills");
-    const commodities = uniqueValues(COMMODITY_COL);
-    let html = `<button class="pill active" data-c="__all__">Todas</button>`;
-    commodities.forEach(c => {
-      html += `<button class="pill" data-c="${c}">${c}</button>`;
-    });
-    pills.innerHTML = html;
+    pills.innerHTML = '<button class="pill active" data-c="__all__" type="button">Todas</button>' +
+      uniqueValues(COMMODITY_COL)
+        .map(c => `<button class="pill" data-c="${esc(c)}" type="button">${esc(c)}</button>`)
+        .join("");
     pills.querySelectorAll(".pill").forEach(b => {
       b.onclick = () => {
         activeCommodity = b.dataset.c;
@@ -183,51 +274,157 @@
       };
     });
 
-    // dropdown de praça
-    const sel = document.getElementById("pracaFilter");
+    // praças (multi-seleção)
+    const panel = document.getElementById("pracaPanel");
     const pracas = uniqueValues(PRACA_COL);
-    sel.innerHTML = '<option value="__all__">Todas as praças</option>' +
-      pracas.map(p => `<option value="${p}">${p}</option>`).join("");
-    sel.onchange = () => { activePraca = sel.value; render(); };
+    panel.innerHTML =
+      `<label><input type="checkbox" id="pracaAll" checked> Todas as praças</label>
+       <div class="sep"></div>` +
+      pracas.map(p =>
+        `<label><input type="checkbox" class="pracaChk" value="${esc(p)}"> ${esc(p)}</label>`
+      ).join("");
 
+    const all = panel.querySelector("#pracaAll");
+    const chks = [...panel.querySelectorAll(".pracaChk")];
+
+    all.onchange = () => {
+      if (all.checked) { chks.forEach(c => c.checked = false); selectedPracas.clear(); }
+      else if (!chks.some(c => c.checked)) { all.checked = true; }
+      updatePracaLabel(); render();
+    };
+
+    chks.forEach(c => {
+      c.onchange = () => {
+        selectedPracas = new Set(chks.filter(x => x.checked).map(x => x.value));
+        all.checked = selectedPracas.size === 0;
+        updatePracaLabel(); render();
+      };
+    });
+
+    // abrir/fechar
+    const multi = document.getElementById("pracaMulti");
+    document.getElementById("pracaBtn").onclick = e => {
+      e.stopPropagation();
+      multi.classList.toggle("open");
+    };
+    panel.onclick = e => e.stopPropagation();
+    document.addEventListener("click", () => multi.classList.remove("open"));
+
+    updatePracaLabel();
     document.getElementById("filters").style.display = "flex";
+  }
+
+  function updatePracaLabel() {
+    const n = selectedPracas.size;
+    document.getElementById("pracaLabel").textContent =
+      n === 0 ? "Todas as praças" :
+      n === 1 ? [...selectedPracas][0] :
+      n + " praças selecionadas";
   }
 
   function filteredRows() {
     return DATA.rows.filter(r =>
       (activeCommodity === "__all__" || r[COMMODITY_COL] === activeCommodity) &&
-      (activePraca === "__all__" || r[PRACA_COL] === activePraca)
+      (selectedPracas.size === 0 || selectedPracas.has(r[PRACA_COL]))
     );
+  }
+
+  /* ---------- render ---------- */
+  function esc(s) {
+    return String(s ?? "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function tableHTML(rows, cols) {
+    let h = "<table><thead><tr>";
+    cols.forEach(c => { h += `<th>${esc(c.label)}</th>`; });
+    h += "</tr></thead><tbody>";
+    rows.forEach(r => {
+      h += "<tr>";
+      cols.forEach(c => { h += `<td>${esc(r[c.key])}</td>`; });
+      h += "</tr>";
+    });
+    return h + "</tbody></table>";
   }
 
   function render() {
     if (!DATA) return;
     fmtFresh(DATA.published_at);
-    if (document.getElementById("filters").style.display === "none") buildFilters();
 
     const rows = filteredRows();
-    const cols = DATA.columns;
+    const content = document.getElementById("content");
+    const count = document.getElementById("count");
 
     if (!rows.length) {
-      document.getElementById("content").innerHTML =
-        '<div class="empty">Nenhum preço para este filtro.</div>';
-      document.getElementById("count").textContent = "";
+      content.innerHTML = '<div class="empty">Nenhum preço para este filtro.</div>';
+      count.textContent = "";
       return;
     }
 
-    let html = "<table><thead><tr>";
-    cols.forEach(c => { html += `<th>${c.label}</th>`; });
-    html += "</tr></thead><tbody>";
-    rows.forEach(r => {
-      html += "<tr>";
-      cols.forEach(c => { html += `<td>${r[c.key] ?? ""}</td>`; });
-      html += "</tr>";
-    });
-    html += "</tbody></table>";
-
-    document.getElementById("content").innerHTML = html;
-    document.getElementById("count").textContent = rows.length + " praças";
+    content.className = "";
+    content.innerHTML = tableHTML(rows, DATA.columns);
+    count.textContent = rows.length + (rows.length === 1 ? " linha" : " linhas");
   }
+
+  /* ---------- exportação ---------- */
+  function stamp() {
+    const d = new Date();
+    return d.getFullYear() +
+      String(d.getMonth() + 1).padStart(2, "0") +
+      String(d.getDate()).padStart(2, "0");
+  }
+
+  function download(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 500);
+  }
+
+  document.getElementById("btnCsv").onclick = () => {
+    const rows = filteredRows(), cols = DATA.columns;
+    const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const lines = [cols.map(c => q(c.label)).join(";")];
+    rows.forEach(r => lines.push(cols.map(c => q(r[c.key])).join(";")));
+    download(
+      new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" }),
+      `precos_originacao_${stamp()}.csv`
+    );
+  };
+
+  document.getElementById("btnPng").onclick = async () => {
+    const rows = filteredRows();
+    if (!rows.length) return;
+
+    const d = new Date(DATA.published_at);
+    const stage = document.getElementById("exportStage");
+    stage.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+                  gap:16px;padding-bottom:18px;border-bottom:1px solid var(--line)">
+        <div style="justify-self:start">
+          <img src="logo-spasso.png" style="height:60px;display:block">
+        </div>
+        <h1 style="justify-self:center;font-size:26px;font-weight:800;letter-spacing:.5px;
+                   color:var(--ink);text-transform:uppercase;white-space:nowrap">
+          Preços Originação
+        </h1>
+        <div style="justify-self:end;font-size:14px;color:var(--muted)">
+          ${d.toLocaleDateString("pt-BR")}
+        </div>
+      </div>
+      <div style="margin-top:22px">${tableHTML(rows, DATA.columns)}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:14px;text-align:right">
+        ${rows.length}${rows.length === 1 ? " linha" : " linhas"}
+      </div>`;
+
+    try {
+      const canvas = await html2canvas(stage, { scale: 2, backgroundColor: "#ffffff" });
+      canvas.toBlob(b => download(b, `precos_originacao_${stamp()}.png`));
+    } finally {
+      stage.innerHTML = "";
+    }
+  };
 
   load();
 </script>
